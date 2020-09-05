@@ -16,6 +16,7 @@ from .forms import OrderForm, CreateUserForm, CustomerForm
 from .filters import OrderFilter
 from .decorators import unauthenticated_user, allowed_users, admin_only
 
+
 @unauthenticated_user
 def registerPage(request):
 
@@ -26,21 +27,13 @@ def registerPage(request):
 			user = form.save()
 			username = form.cleaned_data.get('username')
 
-			group = Group.objects.get(name='customer')
-			user.groups.add(group)
-			#Added username after video because of error returning customer name if not added
-			Customer.objects.create(
-				user=user,
-				name=user.username,
-				)
-
 			messages.success(request, 'Account was created for ' + username)
 
 			return redirect('login')
 		
-
 	context = {'form':form}
 	return render(request, 'accounts/register.html', context)
+
 
 @unauthenticated_user
 def loginPage(request):
@@ -60,9 +53,11 @@ def loginPage(request):
 	context = {}
 	return render(request, 'accounts/login.html', context)
 
+
 def logoutUser(request):
 	logout(request)
 	return redirect('login')
+
 
 @login_required(login_url='login')
 @admin_only
@@ -82,6 +77,7 @@ def home(request):
 
 	return render(request, 'accounts/dashboard.html', context)
 
+
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['customer'])
 def userPage(request):
@@ -96,6 +92,7 @@ def userPage(request):
 	context = {'orders':orders, 'total_orders':total_orders,
 	'delivered':delivered,'pending':pending}
 	return render(request, 'accounts/user.html', context)
+
 
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['customer'])
@@ -113,8 +110,6 @@ def accountSettings(request):
 	return render(request, 'accounts/account_settings.html', context)
 
 
-
-
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin'])
 def products(request):
@@ -122,10 +117,11 @@ def products(request):
 
 	return render(request, 'accounts/products.html', {'products':products})
 
+
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin'])
-def customer(request, pk_test):
-	customer = Customer.objects.get(id=pk_test)
+def customer(request, pk):
+	customer = Customer.objects.get(id=pk)
 
 	orders = customer.order_set.all()
 	order_count = orders.count()
@@ -136,6 +132,7 @@ def customer(request, pk_test):
 	context = {'customer':customer, 'orders':orders, 'order_count':order_count,
 	'myFilter':myFilter}
 	return render(request, 'accounts/customer.html',context)
+
 
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin'])
@@ -155,6 +152,7 @@ def createOrder(request, pk):
 	context = {'form':formset}
 	return render(request, 'accounts/order_form.html', context)
 
+
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin'])
 def updateOrder(request, pk):
@@ -170,6 +168,7 @@ def updateOrder(request, pk):
 
 	context = {'form':form}
 	return render(request, 'accounts/order_form.html', context)
+
 
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin'])
